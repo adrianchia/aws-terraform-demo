@@ -13,6 +13,7 @@ A workshop to learn AWS and Terraform
 - `terraform apply` to make the change, note that terraform will ask for confirmation if you really want to make the change.
 - `terraform apply -auto-approve` to make the change and confirm with no acknowledgement. (only use this if you are absolutely sure)
 - `terraform destroy` to remove all changes done so far.
+- `terraform console` to troubleshoot some issues (like why variables or local reference isn't working)
 
 ## Getting started
 

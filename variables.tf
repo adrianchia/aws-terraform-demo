@@ -5,7 +5,7 @@ variable "default-region" {
 variable "az_config" {
   default = [
     {
-      az_name = "ue-east-1a"
+      az_name = "us-east-1a"
       subnets = [
         {
           cidr_block = "10.0.0.0/19"
@@ -27,7 +27,7 @@ variable "az_config" {
       ]
     },
     {
-      az_name = "ue-east-1b"
+      az_name = "us-east-1b"
       subnets = [
         {
           cidr_block = "10.0.32.0/19"
@@ -49,7 +49,7 @@ variable "az_config" {
       ]
     },
     {
-      az_name = "ue-east-1c"
+      az_name = "us-east-1c"
       subnets = [
         {
           cidr_block = "10.0.64.0/19"
@@ -71,7 +71,7 @@ variable "az_config" {
       ]
     },
     {
-      az_name = "ue-east-1d"
+      az_name = "us-east-1d"
       subnets = [
         {
           cidr_block = "10.0.96.0/19"
