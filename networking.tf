@@ -25,40 +25,178 @@ resource "aws_internet_gateway" "igw" {
 # 2. Creates public / private subnet under our first vpc
 # following the best practices mentioned in https://aws.amazon.com/solutions/implementations/vpc/ and https://aws-quickstart.github.io/quickstart-aws-vpc/
 # which we will create 4 AZs, 2 private subnets, 1 public subnet and 1 spare capacity for each AZ
-locals {
-  az_subnets = flatten([
-    for az in var.az_config : [
-        for j, subnet in az.subnets : {
-          subnet_key = j
-          availability_zone = az.az_name
-          cidr_block = subnet.cidr_block
-          is_private = subnet.is_private
-        }
-    ]
-  ])
-}
-
-resource "aws_subnet" "subnets" {
-  for_each = { for subnet in local.az_subnets : "${subnet.availability_zone}.${subnet.subnet_key}" => subnet}
-
+resource "aws_subnet" "az_1_private_subnet_1" {
   vpc_id = aws_vpc.first_vpc.id
-  cidr_block = each.value.cidr_block
-  availability_zone = each.value.availability_zone
-  map_public_ip_on_launch = !each.value.is_private
+  cidr_block = var.az_config[0].subnets[0].cidr_block
+  availability_zone = var.az_config[0].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
   tags = {
-    Name = "${each.value.is_private ? "Private" : "Public"} Subnet for Acme Squad"
+    Name = "Private Subnet 1 for Acme Squad"
     Team = "Acme Squad"
     Environment = "Development"
-    Kind = each.value.is_private ? "Private" : "Public"
+    Kind = "Private"
+    AZ = "${var.az_config[0].az_name}"
   }
 }
 
-# 3. Create Elastic IPs for each NAT Gateway of each AZs
-resource "aws_eip" "eips" {
-  depends_on = [ aws_internet_gateway.igw ] # EIPs may require IGW to exist prior to association
-  for_each = {
-    for subnet in aws_subnet.subnets: subnet.id => subnet if lookup(subnet.tags, "Kind") == "Public"
+resource "aws_subnet" "az_1_public_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[0].subnets[1].cidr_block
+  availability_zone = var.az_config[0].az_name
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "Public Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Public"
+    AZ = "${var.az_config[0].az_name}"
   }
+}
+
+resource "aws_subnet" "az_1_private_subnet_2" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[0].subnets[2].cidr_block
+  availability_zone = var.az_config[0].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 2 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[0].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_2_private_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[1].subnets[0].cidr_block
+  availability_zone = var.az_config[1].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[1].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_2_public_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[1].subnets[1].cidr_block
+  availability_zone = var.az_config[1].az_name
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "Public Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Public"
+    AZ = "${var.az_config[1].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_2_private_subnet_2" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[1].subnets[2].cidr_block
+  availability_zone = var.az_config[1].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 2 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[1].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_3_private_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[2].subnets[0].cidr_block
+  availability_zone = var.az_config[2].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[2].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_3_public_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[2].subnets[1].cidr_block
+  availability_zone = var.az_config[2].az_name
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "Public Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Public"
+    AZ = "${var.az_config[2].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_3_private_subnet_2" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[2].subnets[2].cidr_block
+  availability_zone = var.az_config[2].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 2 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[2].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_4_private_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[3].subnets[0].cidr_block
+  availability_zone = var.az_config[3].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[3].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_4_public_subnet_1" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[3].subnets[1].cidr_block
+  availability_zone = var.az_config[3].az_name
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "Public Subnet 1 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Public"
+    AZ = "${var.az_config[3].az_name}"
+  }
+}
+
+resource "aws_subnet" "az_4_private_subnet_2" {
+  vpc_id = aws_vpc.first_vpc.id
+  cidr_block = var.az_config[3].subnets[2].cidr_block
+  availability_zone = var.az_config[3].az_name
+  #map_public_ip_on_launch = var.az_config[0].subnets[0].is_private
+  tags = {
+    Name = "Private Subnet 2 for Acme Squad"
+    Team = "Acme Squad"
+    Environment = "Development"
+    Kind = "Private"
+    AZ = "${var.az_config[3].az_name}"
+  }
+}
+
+
+# 3. Create Elastic IPs for each NAT Gateway of each AZs
+resource "aws_eip" "az_1_eip" {
+  depends_on = [ aws_internet_gateway.igw ] # EIPs may require IGW to exist prior to association
 
   vpc = true
 
@@ -66,63 +204,309 @@ resource "aws_eip" "eips" {
     Name = "EIP for Nat Gateway"
     Team = "Acme Squad"
     Environment = "Development"
-    For = each.key
+    For = aws_subnet.az_1_public_subnet_1.availability_zone
   }
 }
 
-resource "aws_nat_gateway" "ngw" {
-  depends_on = [
-    aws_internet_gateway.igw,
-    aws_eip.eips
-  ]
+resource "aws_eip" "az_2_eip" {
+  depends_on = [ aws_internet_gateway.igw ] # EIPs may require IGW to exist prior to association
 
-  for_each = { for i, eip in aws_eip.eips : "eip-${i}" => eip }
-
-  allocation_id = each.value.allocation_id
-  subnet_id = each.value.tags.For
+  vpc = true
 
   tags = {
-    Name = "Nat Gateway"
+    Name = "EIP for Nat Gateway"
     Team = "Acme Squad"
     Environment = "Development"
-    For = each.value.tags.For
+    For = aws_subnet.az_2_public_subnet_1.availability_zone
   }
 }
 
-# Route Table for private subnets
-resource "aws_route_table" "private_subnets_to_ngw" {
+resource "aws_eip" "az_3_eip" {
+  depends_on = [ aws_internet_gateway.igw ] # EIPs may require IGW to exist prior to association
+
+  vpc = true
+
+  tags = {
+    Name = "EIP for Nat Gateway"
+    Team = "Acme Squad"
+    Environment = "Development"
+    For = aws_subnet.az_3_public_subnet_1.availability_zone
+  }
+}
+
+resource "aws_eip" "az_4_eip" {
+  depends_on = [ aws_internet_gateway.igw ] # EIPs may require IGW to exist prior to association
+
+  vpc = true
+
+  tags = {
+    Name = "EIP for Nat Gateway"
+    Team = "Acme Squad"
+    Environment = "Development"
+    For = aws_subnet.az_4_public_subnet_1.availability_zone
+  }
+}
+
+resource "aws_nat_gateway" "az_1_ngw" {
   depends_on = [
-    aws_nat_gateway.ngw
+    aws_internet_gateway.igw,
+    aws_eip.az_1_eip,
+    aws_subnet.az_1_public_subnet_1
   ]
 
-  for_each = { for i, ngw in aws_nat_gateway.ngw : "ngw-${i}" => ngw }
+
+  allocation_id = aws_eip.az_1_eip.allocation_id
+  subnet_id = aws_subnet.az_1_public_subnet_1.id
+
+  tags = {
+    Name = "Nat Gateway for ${aws_subnet.az_1_public_subnet_1.availability_zone}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+resource "aws_nat_gateway" "az_2_ngw" {
+  depends_on = [
+    aws_internet_gateway.igw,
+    aws_eip.az_2_eip,
+    aws_subnet.az_2_public_subnet_1
+  ]
+
+
+  allocation_id = aws_eip.az_2_eip.allocation_id
+  subnet_id = aws_subnet.az_2_public_subnet_1.id
+
+  tags = {
+    Name = "Nat Gateway for ${aws_subnet.az_2_public_subnet_1.availability_zone}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+resource "aws_nat_gateway" "az_3_ngw" {
+  depends_on = [
+    aws_internet_gateway.igw,
+    aws_eip.az_3_eip,
+    aws_subnet.az_3_public_subnet_1
+  ]
+
+
+  allocation_id = aws_eip.az_3_eip.allocation_id
+  subnet_id = aws_subnet.az_3_public_subnet_1.id
+
+  tags = {
+    Name = "Nat Gateway for ${aws_subnet.az_3_public_subnet_1.availability_zone}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+resource "aws_nat_gateway" "az_4_ngw" {
+  depends_on = [
+    aws_internet_gateway.igw,
+    aws_eip.az_4_eip,
+    aws_subnet.az_4_public_subnet_1
+  ]
+
+
+  allocation_id = aws_eip.az_4_eip.allocation_id
+  subnet_id = aws_subnet.az_4_public_subnet_1.id
+
+  tags = {
+    Name = "Nat Gateway for ${aws_subnet.az_4_public_subnet_1.availability_zone}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+
+# Route Table for AZ 1 private subnet 1
+resource "aws_route_table" "rt_az_1_private_1" {
+  depends_on = [
+    aws_nat_gateway.az_1_ngw
+  ]
+
   vpc_id = aws_vpc.first_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = each.value.id
+    nat_gateway_id = aws_nat_gateway.az_1_ngw.id
   }
 
   tags = {
-    Name = "Route Table for private subnet"
+    Name = "Route Table for private subnet ${aws_subnet.az_1_private_subnet_1.id}"
     Team = "Acme Squad"
     Environment = "Development"
   }
 }
-/*
-resource "aws_route_table_association" "private_subnet_rt_associations" {
+
+# Route Table for AZ 2 private subnet 1
+resource "aws_route_table" "rt_az_2_private_1" {
   depends_on = [
-    aws_subnet.subnets,
-    aws_route_table.private_subnets_to_ngw
+    aws_nat_gateway.az_2_ngw
   ]
 
-  for_each = {
-    for i, rt in aws_route_table.private_subnets_to_ngw: "rt-${i}" => rt
+  vpc_id = aws_vpc.first_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.az_2_ngw.id
   }
 
-  subnet_id = each.value.tags.For
-  route_table_id = each.value.id
-}*/
+  tags = {
+    Name = "Route Table for private subnet ${aws_subnet.az_2_private_subnet_1.id}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+# Route Table for AZ 3 private subnet 1
+resource "aws_route_table" "rt_az_3_private_1" {
+  depends_on = [
+    aws_nat_gateway.az_3_ngw
+  ]
+
+  vpc_id = aws_vpc.first_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.az_3_ngw.id
+  }
+
+  tags = {
+    Name = "Route Table for private subnet ${aws_subnet.az_3_private_subnet_1.id}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+# Route Table for AZ 4 private subnet 1
+resource "aws_route_table" "rt_az_4_private_1" {
+  depends_on = [
+    aws_nat_gateway.az_4_ngw
+  ]
+
+  vpc_id = aws_vpc.first_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.az_4_ngw.id
+  }
+
+  tags = {
+    Name = "Route Table for private subnet ${aws_subnet.az_4_private_subnet_1.id}"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+# Route table associations for az 1 private subnet 1
+resource "aws_route_table_association" "rta_az1_private1" {
+  depends_on = [
+    aws_subnet.az_1_private_subnet_1,
+    aws_route_table.rt_az_1_private_1
+  ]
+
+  subnet_id = aws_subnet.az_1_private_subnet_1.id
+  route_table_id = aws_route_table.rt_az_1_private_1.id
+}
+
+# Route table associations for az 2 private subnet 1
+resource "aws_route_table_association" "rta_az2_private1" {
+  depends_on = [
+    aws_subnet.az_2_private_subnet_1,
+    aws_route_table.rt_az_2_private_1
+  ]
+
+  subnet_id = aws_subnet.az_2_private_subnet_1.id
+  route_table_id = aws_route_table.rt_az_2_private_1.id
+}
+
+# Route table associations for az 3 private subnet 1
+resource "aws_route_table_association" "rta_az3_private1" {
+  depends_on = [
+    aws_subnet.az_3_private_subnet_1,
+    aws_route_table.rt_az_3_private_1
+  ]
+
+  subnet_id = aws_subnet.az_3_private_subnet_1.id
+  route_table_id = aws_route_table.rt_az_3_private_1.id
+}
+
+# Route table associations for az 4 private subnet 1
+resource "aws_route_table_association" "rta_az4_private1" {
+  depends_on = [
+    aws_subnet.az_4_private_subnet_1,
+    aws_route_table.rt_az_4_private_1
+  ]
+
+  subnet_id = aws_subnet.az_4_private_subnet_1.id
+  route_table_id = aws_route_table.rt_az_4_private_1.id
+}
+
+# Route Table for public
+resource "aws_route_table" "rt_public" {
+  depends_on = [
+    aws_internet_gateway.igw
+  ]
+
+  vpc_id = aws_vpc.first_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "Route Table for public subnets"
+    Team = "Acme Squad"
+    Environment = "Development"
+  }
+}
+
+# Route table associations for az 1 public subnet 1
+resource "aws_route_table_association" "rta_az1_public1" {
+  depends_on = [
+    aws_subnet.az_1_public_subnet_1,
+    aws_route_table.rt_public
+  ]
+
+  subnet_id = aws_subnet.az_1_public_subnet_1.id
+  route_table_id = aws_route_table.rt_public.id
+}
+
+# Route table associations for az 2 public subnet 1
+resource "aws_route_table_association" "rta_az2_public1" {
+  depends_on = [
+    aws_subnet.az_2_public_subnet_1,
+    aws_route_table.rt_public
+  ]
+
+  subnet_id = aws_subnet.az_2_public_subnet_1.id
+  route_table_id = aws_route_table.rt_public.id
+}
+
+# Route table associations for az 3 public subnet 1
+resource "aws_route_table_association" "rta_az3_public1" {
+  depends_on = [
+    aws_subnet.az_3_public_subnet_1,
+    aws_route_table.rt_public
+  ]
+
+  subnet_id = aws_subnet.az_3_public_subnet_1.id
+  route_table_id = aws_route_table.rt_public.id
+}
+
+# Route table associations for az 4 public subnet 1
+resource "aws_route_table_association" "rta_az4_public1" {
+  depends_on = [
+    aws_subnet.az_4_public_subnet_1,
+    aws_route_table.rt_public
+  ]
+
+  subnet_id = aws_subnet.az_4_public_subnet_1.id
+  route_table_id = aws_route_table.rt_public.id
+}
 
 output "first_vpc_arn" {
   value = aws_vpc.first_vpc.arn
@@ -130,24 +514,4 @@ output "first_vpc_arn" {
 
 output "first_vpc_igw_arn" {
   value = aws_internet_gateway.igw.arn
-}
-
-output "subnets" {
-  description = "Subnet Information"
-  value = [ for subnet in aws_subnet.subnets : {
-    id = subnet.id
-    arn = subnet.arn
-    az = subnet.availability_zone
-    kind = subnet.tags.Kind
-  }]
-}
-
-output "nat_eips" {
-  description = "Elastic IP allocation ids for Nat Gateway"
-  value = [ for eip in aws_eip.eips : eip.allocation_id ]
-}
-
-output "nat_gateways" {
-  description = "ids for Nat Gateway"
-  value = [ for ngw in aws_nat_gateway.ngw : ngw.id ]
 }
